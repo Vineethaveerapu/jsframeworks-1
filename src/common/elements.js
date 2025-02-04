@@ -44,6 +44,7 @@ function getNav() {
         <li><a href="/contact">Contact</a></li>
         <li><a href="/services">Services</a></li>
         <li><a href="/team">Team</a></li>
+        <li><a href="/books">Books</a></li>
       </ul>
     </nav>
   `;

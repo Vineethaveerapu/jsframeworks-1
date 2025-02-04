@@ -1,0 +1,44 @@
+{
+  "fiction": {
+    "title": "Fiction Books",
+    "description": "Explore our collection of fiction books",
+    "books": [
+      {
+        "name": "The Great Adventure",
+        "author": "Jane Smith",
+        "price": 19.99
+      },
+      {
+        "name": "Mystery Manor",
+        "author": "John Doe",
+        "price": 15.99
+      },
+      {
+        "name": "Future World",
+        "author": "Sarah Johnson",
+        "price": 21.99
+      }
+    ]
+  },
+  "nonfiction": {
+    "title": "Non-Fiction Books",
+    "description": "Discover our non-fiction collection",
+    "books": [
+      {
+        "name": "The Art of Coding",
+        "author": "Mike Wilson",
+        "price": 29.99
+      },
+      {
+        "name": "History of Time",
+        "author": "Lisa Chen",
+        "price": 24.99
+      },
+      {
+        "name": "Science Today",
+        "author": "Tom Brown",
+        "price": 18.99
+      }
+    ]
+  }
+}

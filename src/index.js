@@ -1,6 +1,7 @@
 const { createServer } = require("http");
 const { readFile } = require("fs/promises");
 const path = require("path");
+const url = require("url");
 
 const { wrapInHTML } = require("./common/elements");
 
@@ -28,9 +29,14 @@ async function readContentFile(filename) {
 }
 
 server.on("request", async (req, res) => {
-  const pathname = req.url;
+  const parsedUrl = url.parse(req.url, true);
+  const pathname = parsedUrl.pathname;
+  const query = parsedUrl.query;
 
   console.log("request", pathname);
+  if (query) {
+    console.log("query", JSON.stringify(query, null, 2));
+  }
 
   try {
     switch (pathname) {
@@ -44,6 +50,14 @@ server.on("request", async (req, res) => {
             <li><a href="/contact">Contact Page</a> - Direct HTML render</li>
             <li><a href="/services">Services Page</a> - Direct HTML render</li>
             <li><a href="/team">Team Page</a> - Content from external file</li>
+            <li><a href="/books">Books Page</a> - Content from external file with query parameters:
+              <ul>
+                <li><a href="/books?category=fiction">Fiction Books</a></li>
+                <li><a href="/books?category=nonfiction">Non-Fiction Books</a></li>
+                <li>Add view=compact for compact view: <a href="/books?category=fiction&view=compact">Example</a></li>
+                <li>Add sort=price to sort by price: <a href="/books?category=fiction&sort=price">Example</a></li>
+              </ul>
+            </li>
           </ul>
         `;
         res.end(wrapInHTML("Home Page", content));
@@ -93,6 +107,61 @@ server.on("request", async (req, res) => {
           ${teamContent}
         `;
         res.end(wrapInHTML("Our Team", content));
+        break;
+      }
+
+      case "/books": {
+        res.setHeader("Content-Type", "text/html");
+        const booksData = JSON.parse(await readContentFile("books.json"));
+        const category = query.category || "fiction";
+        const view = query.view || "full";
+        const sort = query.sort;
+
+        if (!booksData[category]) {
+          res.statusCode = 404;
+          res.end(wrapInHTML("404 Not Found", "<h1>Category not found</h1>"));
+          return;
+        }
+
+        const categoryData = booksData[category];
+        let books = [...categoryData.books];
+
+        // Handle sorting
+        if (sort === "price") {
+          books.sort((a, b) => a.price - b.price);
+        }
+
+        const booksHtml = books
+          .map((book) => {
+            if (view === "compact") {
+              return `<li>${book.name} - $${book.price}</li>`;
+            }
+            return `
+            <li>
+              <h3>${book.name}</h3>
+              <p>Author: ${book.author}</p>
+              <p>Price: $${book.price}</p>
+            </li>
+          `;
+          })
+          .join("");
+
+        const content = `
+          <h1>${categoryData.title}</h1>
+          <p>${categoryData.description}</p>
+          <ul class="books-list">
+            ${booksHtml}
+          </ul>
+          <div class="view-options">
+            <p>View options:</p>
+            <ul>
+              <li><a href="/books?category=${category}">Full View</a></li>
+              <li><a href="/books?category=${category}&view=compact">Compact View</a></li>
+              <li><a href="/books?category=${category}&sort=price">Sort by Price</a></li>
+            </ul>
+          </div>
+        `;
+        res.end(wrapInHTML(`Books - ${categoryData.title}`, content));
         break;
       }
 
